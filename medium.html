@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ball & Bricks</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/three.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .btn {
+            font-family: 'Press Start 2P', cursive;
+            width: 1500px;
+            background-color: rgb(0, 0, 0);
+            text-align: center;
+            overflow: hidden;
+            font-size: 20px;
+            color: rgb(230, 255, 255);
+            padding-top: 20px;
+            padding-right: 100px;
+        }
+
+        .btn:hover {
+            color: rgb(224, 209, 209);
+        }
+    </style>
+</head>
+
+<body>
+    <span id="score" style=" margin-left:380px; font-family: 'Press Start 2P', cursive;  font-size: 20px; color: rgb(0,0,0)"></span>
+    <span style=" margin-left:380px; font-family: 'Press Start 2P', cursive; font-size: 20px; color:rgb(0,0,0)">Live:</span>
+    <span id="live1" class="glyphicon glyphicon-heart" style="color:crimson;"></span>
+    <span id="live2" class="glyphicon glyphicon-heart" style="color:crimson;"></span>
+    <span id="live3" class="glyphicon glyphicon-heart" style="color:crimson;"></span>
+    <div id="web-gl"></div>
+
+    <script>
+        var camera, scene, renderer;
+        var plane, planeGeo, planeMat;
+        var ball, ballGeo, ballMaterial, ball1, ball1Geo, ball1Material, cube, cube1, box15Geo, box15Mat;
+        var box, box1, box2, box3, box4, box5, box6, box7, box8, box9, box10, box11, box12, box13, box14, box16, box17, box18, box19, box20, box21, box22;
+        var z = Math.random();
+        var dx;
+        if (z > 0.5) {
+            dx = -1 - z;
+        }
+        if (z <= 0.5) {
+            dx = 1 + z;
+        }
+        var r = Math.floor(Math.random() * 28) + 1;
+        var w = Math.floor(Math.random() * 21) + 1;
+        while (w == r) {
+            w = Math.floor(Math.random() * 21) + 1;
+        }
+        var dy = 1 + z;
+        var dx1 = 2;
+        var dy1 = 1;
+        var score = 0;
+        var live = 3;
+        var box15;
+        var q = 0, u = 0, o = 0, u1 = 0, o1 = 0, l = 0, g = 0 ,h=0;
+        var clock = new THREE.Clock();
+        var tick = 0;
+        var options, spawnerOptions, particleSystem;
+        var audioLoader;
+        var sound;
+        var a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0, a8 = 0, a9 = 0, a10 = 0, a11 = 0, a12 = 0, a13 = 0, a14 = 0, a15 = 0, a16 = 0, a17 = 0, a18 = 0, a19 = 0, a20 = 0, a21 = 0, a22 = 0, a23 = 0, a24 = 0, a25 = 0, a26 = 0, a27 = 0, a28 = 0;
+        var b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, b7 = 0, b8 = 0, b9 = 0, b10 = 0, b11 = 0, b12 = 0, b13 = 0, b14 = 0, b15 = 0, b16 = 0, b17 = 0, b18 = 0, b19 = 0, b20 = 0, b21 = 0, b22 = 0, b23 = 0, b24 = 0, b25 = 0, b26 = 0, b27 = 0, b28 = 0;
+        var c1 = 0, c2 = 0, c3 = 0, c4 = 0, c5 = 0, c6 = 0, c7 = 0, c8 = 0, c9 = 0, c10 = 0, c11 = 0, c12 = 0, c13 = 0, c14 = 0, c15 = 0, c16 = 0, c17 = 0, c18 = 0, c19 = 0, c20 = 0, c21 = 0, c22 = 0, c23 = 0, c24 = 0, c25 = 0, c26 = 0, c27 = 0, c28 = 0;
+        var d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 0, d6 = 0, d7 = 0, d8 = 0, d9 = 0, d10 = 0, d11 = 0, d12 = 0, d13 = 0, d14 = 0, d15 = 0, d16 = 0, d17 = 0, d18 = 0, d19 = 0, d20 = 0, d21 = 0, d22 = 0, d23 = 0, d24 = 0, d25 = 0, d26 = 0, d27 = 0, d28 = 0;
+        init();
+        animate();
+
+        function init() {
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, -300);
+            camera.lookAt(0, 0, 0);
+            //////////////////////////////
+            renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(new THREE.Color(0xffffff));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            /////////////////////////////////
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            /////////////////////////////////
+            var ambiColor = "#ffffff";
+            var ambientLight = new THREE.AmbientLight(ambiColor);
+            scene.add(ambientLight);
+            ///////////////////////////////////
+            var listener = new THREE.AudioListener();
+            scene.add(listener);
+            audioLoader = new THREE.AudioLoader();
+            sound = new THREE.PositionalAudio(listener);
+	       		audioLoader.load('sound/20 Inkwell Isle Two (Piano).mp3', function (buffer) {
+	            sound.setBuffer(buffer);
+	            sound.setRefDistance(5);
+	            sound.play();
+                sound.loop = true;
+        	}); 
+            scene.add(sound);
+            ///////////////////////////////////
+            var texture1 = new THREE.TextureLoader().load('texture/download.jfif');
+            texture1.repeat.set(1, 1);
+            texture1.wrapS = THREE.RepeatWrapping;
+            texture1.wrapT = THREE.RepeatWrapping;
+            texture1.magFilter = THREE.NearestFilter;
+            texture1.minFilter = THREE.LinearMipMapLinearFilter;
+            ///////////////////////////////////
+            var texture2 = new THREE.TextureLoader().load('texture/basket.jfif');
+            texture2.repeat.set(1, 1);
+            texture2.wrapS = THREE.RepeatWrapping;
+            texture2.wrapT = THREE.RepeatWrapping;
+            texture2.magFilter = THREE.NearestFilter;
+            texture2.minFilter = THREE.LinearMipMapLinearFilter;
+            /////////////////////////////////
+            var texture3 = new THREE.TextureLoader().load('texture/gift4.jfif');
+            texture3.repeat.set(1, 1);
+            texture3.wrapS = THREE.RepeatWrapping;
+            texture3.wrapT = THREE.RepeatWrapping;
+            texture3.magFilter = THREE.NearestFilter;
+            texture3.minFilter = THREE.LinearMipMapLinearFilter;
+            //////////////////////////////////
+            var texture4 = new THREE.TextureLoader().load('texture/gift5.jfif');
+            texture4.repeat.set(1, 1);
+            texture4.wrapS = THREE.RepeatWrapping;
+            texture4.wrapT = THREE.RepeatWrapping;
+            texture4.magFilter = THREE.NearestFilter;
+            texture4.minFilter = THREE.LinearMipMapLinearFilter;
+            //////////////////////////////////
+            var surface = new THREE.PlaneGeometry(290, 220);
+            var surfacematerial = new THREE.MeshPhongMaterial({ color: 0xffe6e6, side: THREE.DoubleSide });
+            var surfacemesh = new THREE.Mesh(surface, surfacematerial);
+            surfacemesh.position.set(5, 10, 1)
+            scene.add(surfacemesh);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box1 = new THREE.Mesh(boxGeo, boxMat);
+            box1.position.set(5, 110, 1);
+            scene.add(box1);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box2 = new THREE.Mesh(boxGeo, boxMat);
+            box2.position.set(45, 110, 1);
+            scene.add(box2);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box3 = new THREE.Mesh(boxGeo, boxMat);
+            box3.position.set(-35, 110, 1);
+            scene.add(box3);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x3d293d });
+            box4 = new THREE.Mesh(boxGeo, boxMat);
+            box4.position.set(85, 110, 1);
+            scene.add(box4);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x3d293d });
+            box5 = new THREE.Mesh(boxGeo, boxMat);
+            box5.position.set(-75, 110, 1);
+            scene.add(box5);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x2e1f2e });
+            box6 = new THREE.Mesh(boxGeo, boxMat);
+            box6.position.set(125, 110, 1);
+            scene.add(box6);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x2e1f2e });
+            box7 = new THREE.Mesh(boxGeo, boxMat);
+            box7.position.set(-115, 110, 1);
+            scene.add(box7);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xa375a3 });
+            box8 = new THREE.Mesh(boxGeo, boxMat);
+            box8.position.set(5, 98, 1);
+            scene.add(box8);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box9 = new THREE.Mesh(boxGeo, boxMat);
+            box9.position.set(45, 98, 1);
+            scene.add(box9);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box10 = new THREE.Mesh(boxGeo, boxMat);
+            box10.position.set(-35, 98, 1);
+            scene.add(box10);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box11 = new THREE.Mesh(boxGeo, boxMat);
+            box11.position.set(85, 98, 1);
+            scene.add(box11);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box12 = new THREE.Mesh(boxGeo, boxMat);
+            box12.position.set(-75, 98, 1);
+            scene.add(box12);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x3d293d });
+            box13 = new THREE.Mesh(boxGeo, boxMat);
+            box13.position.set(125, 98, 1);
+            scene.add(box13);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x3d293d });
+            box14 = new THREE.Mesh(boxGeo, boxMat);
+            box14.position.set(-115, 98, 1);
+            scene.add(box14);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xc2a3c2 });
+            box15 = new THREE.Mesh(boxGeo, boxMat);
+            box15.position.set(5, 86, 1);
+            scene.add(box15);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xa375a3 });
+            box16 = new THREE.Mesh(boxGeo, boxMat);
+            box16.position.set(45, 86, 1);
+            scene.add(box16);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xa375a3 });
+            box17 = new THREE.Mesh(boxGeo, boxMat);
+            box17.position.set(-35, 86, 1);
+            scene.add(box17);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box18 = new THREE.Mesh(boxGeo, boxMat);
+            box18.position.set(85, 86, 1);
+            scene.add(box18);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box19 = new THREE.Mesh(boxGeo, boxMat);
+            box19.position.set(-75, 86, 1);
+            scene.add(box19);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box20 = new THREE.Mesh(boxGeo, boxMat);
+            box20.position.set(125, 86, 1);
+            scene.add(box20);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box21 = new THREE.Mesh(boxGeo, boxMat);
+            box21.position.set(-115, 86, 1);
+            scene.add(box21);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xe0d1e0 });
+            box22 = new THREE.Mesh(boxGeo, boxMat);
+            box22.position.set(5, 74, 1);
+            scene.add(box22);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xc2a3c2 });
+            box23 = new THREE.Mesh(boxGeo, boxMat);
+            box23.position.set(45, 74, 1);
+            scene.add(box23);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xc2a3c2 });
+            box24 = new THREE.Mesh(boxGeo, boxMat);
+            box24.position.set(-35, 74, 1);
+            scene.add(box24);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xa375a3 });
+            box25 = new THREE.Mesh(boxGeo, boxMat);
+            box25.position.set(85, 74, 1);
+            scene.add(box25);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0xa375a3 });
+            box26 = new THREE.Mesh(boxGeo, boxMat);
+            box26.position.set(-75, 74, 1);
+            scene.add(box26);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box27 = new THREE.Mesh(boxGeo, boxMat);
+            box27.position.set(125, 74, 1);
+            scene.add(box27);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(35, 9, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x7a527a });
+            box28 = new THREE.Mesh(boxGeo, boxMat);
+            box28.position.set(-115, 74, 1);
+            scene.add(box28);
+            ///////////////////////////////////
+            var boxGeo = new THREE.BoxGeometry(50, 6, 0);
+            var boxMat = new THREE.MeshPhongMaterial({ color: 0x5c3d5c });
+            box = new THREE.Mesh(boxGeo, boxMat);
+            box.position.set(5, -95, 1);
+            scene.add(box);
+            /////////////////////////////////////
+            ballGeo = new THREE.SphereBufferGeometry(4);
+            ballMaterial = new THREE.MeshLambertMaterial({ map: texture1 });
+            ball = new THREE.Mesh(ballGeo, ballMaterial);
+            ball.position.set(5, -85, 2);
+            scene.add(ball);
+            ////////////////////////////////////
+            ball1Geo = new THREE.SphereBufferGeometry(4);
+            ball1Material = new THREE.MeshLambertMaterial({ map: texture2 });
+            ball1 = new THREE.Mesh(ball1Geo, ball1Material);
+            ////////////////////////////////////
+            var cubeGeometry = new THREE.BoxGeometry(5, 5, 5);
+            var cubeMaterial = new THREE.MeshLambertMaterial({ map: texture4 });
+            cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            /////////////////////////////
+            var cube1Geometry = new THREE.BoxGeometry(5, 5, 5);
+            var cube1Material = new THREE.MeshLambertMaterial({ map: texture3 });
+            cube1 = new THREE.Mesh(cube1Geometry, cube1Material);
+
+            document.getElementById("web-gl").appendChild(renderer.domElement);
+
+            document.addEventListener("mousemove", mouseMoveHandler, false);
+
+            function mouseMoveHandler(event) {
+                if (box.position.x < 126 && box.position.x > -119) {
+                    box.position.x = -[(event.clientX / 2.4) - 300];
+                }
+                if (box.position.x > 126) {
+                    box.position.x = 124;
+                }
+                if (box.position.x < -119) {
+                    box.position.x = -115;
+                }
+            }
+
+        }
+
+        function animate() {
+
+            var t = (Date.now() / 1000);
+            document.getElementById('score').innerHTML = "Score:" + score;
+            ball.rotation.y += 0.08;
+            ball.rotation.x += 0.08;
+            var i = box.position.x - (50 / 2);
+            var j = box.position.x + (50 / 2);
+            if (ball.position.x > 146 || ball.position.x < -136) {
+                dx = -dx;
+            }
+            ball.position.x += dx;
+
+            if (ball.position.y >= 116) {
+                dy = -dy;
+            }
+            if (ball.position.x >= i && ball.position.x <= j && ball.position.y <= -88) {
+                dy = - dy;
+            }
+            ball.position.y += dy;
+
+            if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 102 && ball.position.y < 118 && a6 == 0 && b6 == 0) {
+                scene.remove(box6);
+                dx = -dx;
+                dy = - dy;
+                a6++;
+                score++;
+                if (c6 != 0) { scene.add(ball1); g++; }
+                if (d6 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 90 && ball.position.y < 106 && a13 == 0 && b13 == 0) {
+                scene.remove(box13);
+                dx = -dx;
+                dy = - dy;
+                a13++;
+                score++;
+                if (c13 != 0) { scene.add(ball1); g++; }
+                if (d13 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 78 && ball.position.y < 94 && a20 == 0 && b20 == 0) {
+                scene.remove(box20);
+                dx = -dx;
+                dy = - dy;
+                a20++;
+                score++;
+                if (c20 != 0) { scene.add(ball1); g++; }
+                if (d20 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 66 && ball.position.y < 82 && a27 == 0 && b27 == 0) {
+                scene.remove(box27);
+                dx = -dx;
+                dy = - dy;
+                a27++;
+                score++;
+                if (c27 != 0) { scene.add(ball1); g++; }
+                if (d27 != 0) { scene.add(cube); h++; }
+            }
+
+            if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 102 && ball.position.y < 118 && a4 == 0 && b4 == 0) {
+                scene.remove(box4);
+                dx = -dx;
+                dy = - dy;
+                a4++;
+                score++;
+                if (c4 != 0) { scene.add(ball1); g++; }
+                if (d4 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 90 && ball.position.y < 106 && a11 == 0 && b11 == 0) {
+                scene.remove(box11);
+                dx = -dx;
+                dy = - dy;
+                a11++;
+                score++;
+                if (c11 != 0) { scene.add(ball1); g++; }
+                if (d11 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 78 && ball.position.y < 94 && a18 == 0 && b18 == 0) {
+                scene.remove(box18);
+                dx = -dx;
+                dy = - dy;
+                a18++;
+                score++;
+                if (c18 != 0) { scene.add(ball1); g++; }
+                if (d18 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 66 && ball.position.y < 82 && a25 == 0 && b25 == 0) {
+                scene.remove(box25);
+                dx = -dx;
+                dy = - dy;
+                a25++;
+                score++;
+                if (c25 != 0) { scene.add(ball1); g++; }
+                if (d25 != 0) { scene.add(cube); h++; }
+            }
+
+            if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 102 && ball.position.y < 118 && a2 == 0 && b2 == 0) {
+                scene.remove(box2);
+                dx = -dx;
+                dy = - dy;
+                a2++;
+                score++;
+                if (c2 != 0) { scene.add(ball1); g++; }
+                if (d2 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 90 && ball.position.y < 106 && a9 == 0 && b9 == 0) {
+                scene.remove(box9);
+                dx = -dx;
+                dy = - dy;
+                a9++;
+                score++;
+                if (c9 != 0) { scene.add(ball1); g++; }
+                if (d9 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 78 && ball.position.y < 94 && a16 == 0 && b16 == 0) {
+                scene.remove(box16);
+                dx = -dx;
+                dy = - dy;
+                a16++;
+                score++;
+                if (c16 != 0) { scene.add(ball1); g++; }
+                if (d16 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 66 && ball.position.y < 82 && a23 == 0 && b23 == 0) {
+                scene.remove(box23);
+                dx = -dx;
+                dy = - dy;
+                a23++;
+                score++;
+                if (c23 != 0) { scene.add(ball1); g++; }
+                if (d23 != 0) { scene.add(cube); h++; }
+            }
+
+            if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 102 && ball.position.y < 118 && a1 == 0 && b1 == 0) {
+                scene.remove(box1);
+                dx = -dx;
+                dy = - dy;
+                a1++;
+                score++;
+                if (c1 != 0) { scene.add(ball1); g++; }
+                if (d1 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 90 && ball.position.y < 106 && a8 == 0 && b8 == 0) {
+                scene.remove(box8);
+                dx = -dx;
+                dy = - dy;
+                a8++;
+                score++;
+                if (c8 != 0) { scene.add(ball1); g++; }
+                if (d8 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 78 && ball.position.y < 94 && a15 == 0 && b15 == 0) {
+                scene.remove(box15);
+                dx = -dx;
+                dy = - dy;
+                a15++;
+                score++;
+                if (c15 != 0) { scene.add(ball1); g++; }
+                if (d15 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 66 && ball.position.y < 82 && a22 == 0 && b22 == 0) {
+                scene.remove(box22);
+                dx = -dx;
+                dy = - dy;
+                a22++;
+                score++;
+                if (c22 != 0) { scene.add(ball1); g++; }
+                if (d22 != 0) { scene.add(cube); h++; }
+            }
+
+            if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 102 && ball.position.y < 118 && a3 == 0 && b3 == 0) {
+                scene.remove(box3);
+                dx = -dx;
+                dy = - dy;
+                a3++;
+                score++;
+                if (c3 != 0) { scene.add(ball1); g++; }
+                if (d3 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 90 && ball.position.y < 106 && a10 == 0 && b10 == 0) {
+                scene.remove(box10);
+                dx = -dx;
+                dy = - dy;
+                a10++;
+                score++;
+                if (c10 != 0) { scene.add(ball1); g++; }
+                if (d10 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 78 && ball.position.y < 94 && a17 == 0 && b17 == 0) {
+                scene.remove(box17);
+                dx = -dx;
+                dy = - dy;
+                a17++;
+                score++;
+                if (c17 != 0) { scene.add(ball1); g++; }
+                if (d17 != 0) { scene.add(cube); h++; }
+            }
+            if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 66 && ball.position.y < 82 && a24 == 0 && b24 == 0) {
+                scene.remove(box24);
+                dx = -dx;
+                dy = - dy;
+                a24++;
+                score++;
+                if (c24 != 0) { scene.add(ball1); g++; }
+                if (d24 != 0) { scene.add(cube); h++; }
+            }
+                if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 102 && ball.position.y < 118 && a5 == 0 && b5 == 0) {
+                    scene.remove(box5);
+                    dx = -dx;
+                    dy = - dy;
+                    a5++;
+                    score++;
+                    if (c5 != 0) { scene.add(ball1); g++; }
+                    if (d5 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 90 && ball.position.y < 106 && a12 == 0 && b12 == 0) {
+                    scene.remove(box12);
+                    dx = -dx;
+                    dy = - dy;
+                    a12++;
+                    score++;
+                    if (c12 != 0) { scene.add(ball1); g++; }
+                    if (d12 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 78 && ball.position.y < 94 && a19 == 0 && b19 == 0) {
+                    scene.remove(box19);
+                    dx = -dx;
+                    dy = - dy;
+                    a19++;
+                    score++;
+                    if (c19 != 0) { scene.add(ball1); g++; }
+                    if (d19 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 66 && ball.position.y < 82 && a26 == 0 && b26 == 0) {
+                    scene.remove(box26);
+                    dx = -dx;
+                    dy = - dy;
+                    a26++;
+                    score++;
+                    if (c26 != 0) { scene.add(ball1); g++; }
+                    if (d26 != 0) { scene.add(cube); h++; }
+                }
+
+                if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 102 && ball.position.y < 118 && a7 == 0 && b7 == 0) {
+                    scene.remove(box7);
+                    dx = -dx;
+                    dy = - dy;
+                    a7++;
+                    score++;
+                    if (c7 != 0) { scene.add(ball1); g++; }
+                    if (d7 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 90 && ball.position.y < 106 && a14 == 0 && b14 == 0) {
+                    scene.remove(box14);
+                    dx = -dx;
+                    dy = - dy;
+                    a14++;
+                    score++;
+                    if (c14 != 0) { scene.add(ball1); g++; }
+                    if (d14 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 78 && ball.position.y < 94 && a21 == 0 && b21 == 0) {
+                    scene.remove(box21);
+                    dx = -dx;
+                    dy = - dy;
+                    a21++;
+                    score++;
+                    if (c21 != 0) { scene.add(ball1); g++; }
+                    if (d21 != 0) { scene.add(cube); h++; }
+                }
+                if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 66 && ball.position.y < 82 && a28 == 0 && b28 == 0) {
+                    scene.remove(box28);
+                    dx = -dx;
+                    dy = - dy;
+                    a28++;
+                    score++;
+                    if (c28 != 0) { scene.add(ball1); g++; }
+                    if (d28 != 0) { scene.add(cube); h++; }
+                }
+                if (score == 28) {
+                    alert("YOU WIN, CONGRATS!");
+                    window.location.href="index.html";
+                }
+
+                if (ball.position.y < -94 && live != 0) {
+                    dy = -dy;
+                    live--;
+                }
+                if (live == 2) {
+                    document.getElementById('live3').style.display = 'none';
+                }
+                if (live == 1) {
+                    document.getElementById('live2').style.display = 'none';
+                }
+                if (ball.position.y < -94 && live == 0) {
+                    document.getElementById('live1').style.display = 'none';
+                    alert("GAME OVER");
+                    document.location.reload();
+
+                }
+                ////////////Toop2///////////////           
+                switch (r) {
+                    case 1:
+                        if (q == 0) {
+                            ball1.position.set(5, 110, 1);
+                            c1++;
+                            q++;
+                        }
+                        break;
+                    case 2:
+                        if (q == 0) {
+                            ball1.position.set(45, 110, 1);
+                            c2++;
+                            q++;
+                        }
+                        break;
+                    case 3:
+                        if (q == 0) {
+                            ball1.position.set(-35, 110, 1);
+                            c3++;
+                            q++;
+                        }
+                        break;
+                    case 4:
+                        if (q == 0) {
+                            ball1.position.set(85, 110, 1);
+                            c4++;
+                            q++;
+                        }
+                        break;
+                    case 5:
+                        if (q == 0) {
+                            ball1.position.set(-75, 110, 1);
+                            c5++;
+                            q++;
+                        }
+                        break;
+                    case 6:
+                        if (q == 0) {
+                            ball1.position.set(125, 110, 1);
+                            c6++;
+                            q++;
+                        }
+                        break;
+                    case 7:
+                        if (q == 0) {
+                            ball1.position.set(-115, 110, 1);
+                            c7++;
+                            q++;
+                        }
+                        break;
+                    case 8:
+                        if (q == 0) {
+                            ball1.position.set(5, 98, 1);
+                            c8++;
+                            q++;
+                        }
+                        break;
+                    case 9:
+                        if (q == 0) {
+                            ball1.position.set(45, 98, 1);
+                            c9++;
+                            q++;
+                        }
+                        break;
+                    case 10:
+                        if (q == 0) {
+                            ball1.position.set(-35, 98, 1);
+                            c10++;
+                            q++;
+                        }
+                        break;
+                    case 11:
+                        if (q == 0) {
+                            ball1.position.set(85, 98, 1);
+                            c11++;
+                            q++;
+                        }
+                        break;
+                    case 12:
+                        if (q == 0) {
+                            ball1.position.set(-75, 98, 1);
+                            c12++;
+                            q++;
+                        }
+                        break;
+                    case 13:
+                        if (q == 0) {
+                            ball1.position.set(125, 98, 1);
+                            c13++;
+                            q++;
+                        }
+                        break;
+                    case 14:
+                        if (q == 0) {
+                            ball1.position.set(-115, 98, 1);
+                            c14++;
+                            q++;
+                        }
+                        break;
+                    case 15:
+                        if (q == 0) {
+                            ball1.position.set(5, 86, 1);
+                            c15++;
+                            q++;
+                        }
+                        break;
+                    case 16:
+                        if (q == 0) {
+                            ball1.position.set(45, 86, 1);
+                            c16++;
+                            q++;
+                        }
+                        break;
+                    case 17:
+                        if (q == 0) {
+                            ball1.position.set(-35, 86, 1);
+                            c17++;
+                            q++;
+                        }
+                        break;
+                    case 18:
+                        if (q == 0) {
+                            ball1.position.set(85, 86, 1);
+                            c18++;
+                            q++;
+                        }
+                        break;
+                    case 19:
+                        if (q == 0) {
+                            ball1.position.set(-75, 86, 1);
+                            c19++;
+                            q++;
+                        }
+                        break;
+                    case 20:
+                        if (q == 0) {
+                            ball1.position.set(125, 86, 1);
+                            c20++;
+                            q++;
+                        }
+                        break;
+                    case 21:
+                        if (q == 0) {
+                            ball1.position.set(-115, 86, 1);
+                            c21++;
+                            q++;
+                        }
+                        break;
+                    case 22:
+                        if (q == 0) {
+                            ball1.position.set(5, 74, 1);
+                            c22++;
+                            q++;
+                        }
+                        break;
+                    case 23:
+                        if (q == 0) {
+                            ball1.position.set(45, 74, 1);
+                            c23++;
+                            q++;
+                        }
+                        break;
+                    case 24:
+                        if (q == 0) {
+                            ball1.position.set(-35, 74, 1);
+                            c24++;
+                            q++;
+                        }
+                        break;
+                    case 25:
+                        if (q == 0) {
+                            ball1.position.set(85, 74, 1);
+                            c25++;
+                            q++;
+                        }
+                        break;
+                    case 26:
+                        if (q == 0) {
+                            ball1.position.set(-75, 74, 1);
+                            c26++;
+                            q++;
+                        }
+                        break;
+                    case 27:
+                        if (q == 0) {
+                            ball1.position.set(125, 74, 1);
+                            c27++;
+                            q++;
+                        }
+                        break;
+                    case 28:
+                        if (q == 0) {
+                            ball1.position.set(-115, 74, 1);
+                            c28++;
+                            q++;
+                        }
+                        break;
+                }
+                if (g != 0 && l == 0) {
+                    ball1.rotation.y += 0.08;
+                    ball1.rotation.x += 0.08;
+                    if (ball1.position.x > 146 || ball1.position.x < -136) {
+                        dx1 = -dx1;
+                    }
+                    ball1.position.x += dx1;
+
+                    if (ball1.position.y > 116) {
+                        dy1 = -dy1;
+                    }
+                    if (ball1.position.x > i && ball1.position.x < j && ball1.position.y <= -88) {
+                        dy1 = - dy1;
+                    }
+                    ball1.position.y += dy1;
+
+                    if (ball1.position.x > 104 && ball1.position.x < 146 && ball1.position.y > 102 && ball1.position.y < 118 && a6 == 0 && b6 == 0) {
+                        scene.remove(box6);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b6++;
+                        score++;
+                    }
+                    if (ball1.position.x > 104 && ball1.position.x < 146 && ball1.position.y > 90 && ball1.position.y < 106 && a13 == 0 && b13 == 0) {
+                        scene.remove(box13);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b13++;
+                        score++;
+                    }
+                    if (ball1.position.x > 104 && ball1.position.x < 146 && ball1.position.y > 78 && ball1.position.y < 94 && a20 == 0 && b20 == 0) {
+                        scene.remove(box20);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b20++;
+                        score++;
+                    }
+                    if (ball1.position.x > 104 && ball1.position.x < 146 && ball1.position.y > 66 && ball1.position.y < 82 && a27 == 0 && b27 == 0) {
+                        scene.remove(box27);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b27++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > 64 && ball1.position.x < 106 && ball1.position.y > 102 && ball1.position.y < 118 && a4 == 0 && b4 == 0) {
+                        scene.remove(box4);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b4++;
+                        score++;
+                    }
+                    if (ball1.position.x > 64 && ball1.position.x < 106 && ball1.position.y > 90 && ball1.position.y < 106 && a11 == 0 && b11 == 0) {
+                        scene.remove(box11);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b11++;
+                        score++;
+                    }
+                    if (ball1.position.x > 64 && ball1.position.x < 106 && ball1.position.y > 78 && ball1.position.y < 94 && a18 == 0 && b18 == 0) {
+                        scene.remove(box18);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b18++;
+                        score++;
+                    }
+                    if (ball1.position.x > 64 && ball1.position.x < 106 && ball1.position.y > 66 && ball1.position.y < 82 && a25 == 0 && b25 == 0) {
+                        scene.remove(box25);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b25++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > 24 && ball1.position.x < 66 && ball1.position.y > 102 && ball1.position.y < 118 && a2 == 0 && b2 == 0) {
+                        scene.remove(box2);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b2++;
+                        score++;
+                    }
+                    if (ball1.position.x > 24 && ball1.position.x < 66 && ball1.position.y > 90 && ball1.position.y < 106 && a9 == 0 && b9 == 0) {
+                        scene.remove(box9);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b9++;
+                        score++;
+                    }
+                    if (ball1.position.x > 24 && ball1.position.x < 66 && ball1.position.y > 78 && ball1.position.y < 94 && a16 == 0 && b16 == 0) {
+                        scene.remove(box16);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b16++;
+                        score++;
+                    }
+                    if (ball1.position.x > 24 && ball1.position.x < 66 && ball1.position.y > 66 && ball1.position.y < 82 && a23 == 0 && b23 == 0) {
+                        scene.remove(box23);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b23++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > -16 && ball1.position.x < 26 && ball1.position.y > 102 && ball1.position.y < 118 && a1 == 0 && b1 == 0) {
+                        scene.remove(box1);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b1++;
+                        score++;
+                    }
+                    if (ball1.position.x > -16 && ball1.position.x < 26 && ball1.position.y > 90 && ball1.position.y < 106 && a8 == 0 && b8 == 0) {
+                        scene.remove(box8);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b8++;
+                        score++;
+                    }
+                    if (ball1.position.x > -16 && ball1.position.x < 26 && ball1.position.y > 78 && ball1.position.y < 94 && a15 == 0 && b15 == 0) {
+                        scene.remove(box15);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b15++;
+                        score++;
+                    }
+                    if (ball1.position.x > -16 && ball1.position.x < 26 && ball1.position.y > 66 && ball1.position.y < 82 && a22 == 0 && b22 == 0) {
+                        scene.remove(box22);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b22++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > -56 && ball1.position.x < -14 && ball1.position.y > 102 && ball1.position.y < 118 && a3 == 0 && b3 == 0) {
+                        scene.remove(box3);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b3++;
+                        score++;
+                    }
+                    if (ball1.position.x > -56 && ball1.position.x < -14 && ball1.position.y > 90 && ball1.position.y < 106 && a10 == 0 && b10 == 0) {
+                        scene.remove(box10);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b10++;
+                        score++;
+                    }
+                    if (ball1.position.x > -56 && ball1.position.x < -14 && ball1.position.y > 78 && ball1.position.y < 94 && a17 == 0 && b17 == 0) {
+                        scene.remove(box17);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b17++;
+                        score++;
+                    }
+                    if (ball1.position.x > -56 && ball1.position.x < -14 && ball1.position.y > 66 && ball1.position.y < 82 && a24 == 0 && b24 == 0) {
+                        scene.remove(box24);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b24++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > -96 && ball1.position.x < -54 && ball1.position.y > 102 && ball1.position.y < 118 && a5 == 0 && b5 == 0) {
+                        scene.remove(box5);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b5++;
+                        score++;
+                    }
+                    if (ball1.position.x > -96 && ball1.position.x < -54 && ball1.position.y > 90 && ball1.position.y < 106 && a12 == 0 && b12 == 0) {
+                        scene.remove(box12);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b12++;
+                        score++;
+                    }
+                    if (ball1.position.x > -96 && ball1.position.x < -54 && ball1.position.y > 78 && ball1.position.y < 94 && a19 == 0 && b19 == 0) {
+                        scene.remove(box19);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b19++;
+                        score++;
+                    }
+                    if (ball1.position.x > -96 && ball1.position.x < -54 && ball1.position.y > 66 && ball1.position.y < 82 && a26 == 0 && b26 == 0) {
+                        scene.remove(box26);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b26++;
+                        score++;
+                    }
+
+                    if (ball1.position.x > -136 && ball1.position.x < -94 && ball1.position.y > 102 && ball1.position.y < 118 && a7 == 0 && b7 == 0) {
+                        scene.remove(box7);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b7++;
+                        score++;
+                    }
+                    if (ball1.position.x > -136 && ball1.position.x < -94 && ball1.position.y > 90 && ball1.position.y < 106 && a14 == 0 && b14 == 0) {
+                        scene.remove(box14);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b14++;
+                        score++;
+                    }
+                    if (ball1.position.x > -136 && ball1.position.x < -94 && ball1.position.y > 78 && ball1.position.y < 94 && a21 == 0 && b21 == 0) {
+                        scene.remove(box21);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b21++;
+                        score++;
+                    }
+                    if (ball1.position.x > -136 && ball1.position.x < -94 && ball1.position.y > 66 && ball1.position.y < 82 && a28 == 0 && b28 == 0) {
+                        scene.remove(box28);
+                        dx1 = -dx1;
+                        dy1 = - dy1;
+                        b28++;
+                        score++;
+                    }
+                    if (ball1.position.y < -94) {
+                        scene.remove(ball1);
+                        l = 1;
+                    }
+                }
+                /////////////////////// Gift1 /////////////////////////          
+
+                switch (w) {
+                    case 1:
+                        if (u == 0) {
+                            cube.position.set(5, 110, 1);
+                            d1++;
+                            u++;
+                        }
+                        break;
+                    case 2:
+                        if (u == 0) {
+                            cube.position.set(45, 110, 1);
+                            d2++;
+                            u++;
+                        }
+                        break;
+                    case 3:
+                        if (u == 0) {
+                            cube.position.set(-35, 110, 1);
+                            d3++;
+                            u++;
+                        }
+                        break;
+                    case 4:
+                        if (u == 0) {
+                            cube.position.set(85, 110, 1);
+                            d4++;
+                            u++;
+                        }
+                        break;
+                    case 5:
+                        if (u == 0) {
+                            cube.position.set(-75, 110, 1);
+                            d5++;
+                            u++;
+                        }
+                        break;
+                    case 6:
+                        if (u == 0) {
+                            cube.position.set(125, 110, 1);
+                            d6++;
+                            u++;
+                        }
+                        break;
+                    case 7:
+                        if (u == 0) {
+                            cube.position.set(-115, 110, 1);
+                            d7++;
+                            u++;
+                        }
+                        break;
+                    case 8:
+                        if (u == 0) {
+                            cube.position.set(5, 98, 1);
+                            d8++;
+                            u++;
+                        }
+                        break;
+                    case 9:
+                        if (u == 0) {
+                            cube.position.set(45, 98, 1);
+                            d9++;
+                            u++;
+                        }
+                        break;
+                    case 10:
+                        if (u == 0) {
+                            cube.position.set(-35, 98, 1);
+                            d10++;
+                            u++;
+                        }
+                        break;
+                    case 11:
+                        if (u == 0) {
+                            cube.position.set(85, 98, 1);
+                            d11++;
+                            u++;
+                        }
+                        break;
+                    case 12:
+                        if (u == 0) {
+                            cube.position.set(-75, 98, 1);
+                            d12++;
+                            u++;
+                        }
+                        break;
+                    case 13:
+                        if (u == 0) {
+                            cube.position.set(125, 98, 1);
+                            d13++;
+                            u++;
+                        }
+                        break;
+                    case 14:
+                        if (u == 0) {
+                            cube.position.set(-115, 98, 1);
+                            d14++;
+                            u++;
+                        }
+                        break;
+                    case 15:
+                        if (u == 0) {
+                            cube.position.set(5, 86, 1);
+                            d15++;
+                            u++;
+                        }
+                        break;
+                    case 16:
+                        if (u == 0) {
+                            cube.position.set(45, 86, 1);
+                            d16++;
+                            u++;
+                        }
+                        break;
+                    case 17:
+                        if (u == 0) {
+                            cube.position.set(-35, 86, 1);
+                            d17++;
+                            u++;
+                        }
+                        break;
+                    case 18:
+                        if (u == 0) {
+                            cube.position.set(85, 86, 1);
+                            d18++;
+                            u++;
+                        }
+                        break;
+                    case 19:
+                        if (u == 0) {
+                            cube.position.set(-75, 86, 1);
+                            d19++;
+                            u++;
+                        }
+                        break;
+                    case 20:
+                        if (u == 0) {
+                            cube.position.set(125, 86, 1);
+                            d20++;
+                            u++;
+                        }
+                        break;
+                    case 21:
+                        if (u == 0) {
+                            cube.position.set(-115, 86, 1);
+                            d21++;
+                            u++;
+                        }
+                        break;
+                    case 22:
+                        if (u == 0) {
+                            cube.position.set(5, 74, 1);
+                            d22++;
+                            u++;
+                        }
+                        break;
+                    case 23:
+                        if (u == 0) {
+                            cube.position.set(45, 74, 1);
+                            d23++;
+                            u++;
+                        }
+                        break;
+                    case 24:
+                        if (u == 0) {
+                            cube.position.set(-35, 74, 1);
+                            d24++;
+                            u++;
+                        }
+                        break;
+                    case 25:
+                        if (u == 0) {
+                            cube.position.set(85, 74, 1);
+                            d25++;
+                            u++;
+                        }
+                        break;
+                    case 26:
+                        if (u == 0) {
+                            cube.position.set(-75, 74, 1);
+                            d26++;
+                            u++;
+                        }
+                        break;
+                    case 27:
+                        if (u == 0) {
+                            cube.position.set(125, 74, 1);
+                            d27++;
+                            u++;
+                        }
+                        break;
+                    case 28:
+                        if (u == 0) {
+                            cube.position.set(-115, 74, 1);
+                            d28++;
+                            u++;
+                        }
+                        break;
+                }
+                if(h!=0){
+                    cube.position.y -= 1;                
+                    if (cube.position.y < -94) {
+                        scene.remove(cube);
+
+                    }
+                    if (cube.position.x > i && cube.position.x < j && cube.position.y == -88 && o == 0 && u == 1) {
+                        scene.remove(cube);
+                        box.scale.x += 0.25;
+                        setTimeout(() => { box.scale.x -= 0.25; }, 3000)
+                        o++;
+                    }
+                }
+                // /////////////////////// Gift2 /////////////////////////
+                // var e = Math.floor(Math.random() * 21) + 1;
+                // if (e == r || e == w) {
+                //     e = Math.floor(Math.random() * 21) + 1;
+                // }
+                // switch (e) {
+                //     case 1:
+                //         if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(5, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 2:
+                //         if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(45, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 3:
+                //         if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(-35, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 4:
+                //         if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(85, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 5:
+                //         if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(-75, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 6:
+                //         if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(125, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 7:
+                //         if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 102 && ball.position.y < 118 && u1 == 0) {
+                //             cube1.position.set(-115, 110, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 8:
+                //         if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(5, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 9:
+                //         if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(45, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 10:
+                //         if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(-35, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 11:
+                //         if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(85, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 12:
+                //         if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(-75, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 13:
+                //         if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(125, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 14:
+                //         if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 90 && ball.position.y < 106 && u1 == 0) {
+                //             cube1.position.set(-115, 98, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 15:
+                //         if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(5, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 16:
+                //         if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(45, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 17:
+                //         if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(-35, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 18:
+                //         if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(85, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 19:
+                //         if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(-75, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 20:
+                //         if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(125, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 21:
+                //         if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 78 && ball.position.y < 94 && u1 == 0) {
+                //             cube1.position.set(-115, 86, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 22:
+                //         if (ball.position.x > -16 && ball.position.x < 26 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(5, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 23:
+                //         if (ball.position.x > 24 && ball.position.x < 66 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(45, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 24:
+                //         if (ball.position.x > -56 && ball.position.x < -14 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(-35, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 25:
+                //         if (ball.position.x > 64 && ball.position.x < 106 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(85, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 26:
+                //         if (ball.position.x > -96 && ball.position.x < -54 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(-75, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 27:
+                //         if (ball.position.x > 104 && ball.position.x < 146 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(125, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                //     case 28:
+                //         if (ball.position.x > -136 && ball.position.x < -94 && ball.position.y > 66 && ball.position.y < 82 && u1 == 0) {
+                //             cube1.position.set(-115, 74, 1);
+                //             scene.add(cube1);
+                //             u1++;
+                //         }
+                //         break;
+                // }
+                // cube1.position.y -= 1;
+                // if (cube1.position.y < -94) {
+                //     scene.remove(cube1);
+
+                // }
+                // if (cube1.position.x > i && cube1.position.x < j && cube1.position.y == -88 && o1 == 0 && u1 == 1) {
+                //     box.scale.x -= 0.25;
+                //     setTimeout(() => { box.scale.x += 0.25; }, 3000)
+                //     o1++;
+                // }
+                requestAnimationFrame(animate);
+
+                renderer.render(scene, camera);
+
+                camera.lookAt(scene.position);
+            }
+    </script>
+</body>
+
+</html>
